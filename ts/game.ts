@@ -50,7 +50,7 @@ export class Game {
     this.bullets.update();
     const i = this.bullets.checkAlienCollision();
     if (i !== -1) {
-      this.aliens.destroy(i);
+      this.score += this.aliens.destroy(i);
     }
     if (this.bullets.checkPlayerCollision()) {
       this.player.destroy();
@@ -59,10 +59,18 @@ export class Game {
 
   draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ui.draw();
+    this.ui.background();
     this.bullets.draw(this.ctx);
     this.player.draw(this.ctx);
     this.aliens.draw(this.ctx);
+    this.ui.status();
+    if (this.pause) {
+      if (this.player.alive) {
+        this.ui.pause();
+      } else {
+        this.ui.GameOver();
+      }
+    }
   }
 
   gameOver() {

@@ -42,3 +42,9 @@ export function collision(e1: CollisionEntity, e2: CollisionEntity) {
   }
   return false;
 }
+
+export function newImage(source: string): HTMLImageElement {
+  const img = new Image();
+  img.src = source;
+  return img;
+}

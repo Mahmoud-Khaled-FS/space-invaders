@@ -14,20 +14,6 @@ export class GameUi {
     this.game.canvas.height = 800;
   }
 
-  draw() {
-    this.background();
-
-    if (this.game.pause) {
-      if (this.game.player.alive) {
-        this.pause();
-      } else {
-        this.GameOver();
-      }
-    } else {
-      this.status();
-    }
-  }
-
   background() {
     this.game.ctx.fillStyle = '#000000';
     this.game.ctx.fillRect(0, 0, this.game.canvas.width, this.game.canvas.height);
