@@ -1,8 +1,6 @@
 import { Alien } from './alien.js';
 import { Entity } from './entity.js';
-import { Game } from './game.js';
 import { Player } from './player.js';
-import { GameContext } from './types';
 import { collision } from './utils.js';
 
 export enum BulletType {
@@ -15,25 +13,22 @@ const shootingSound = new Audio('/sounds/shooting.mp3');
 export class BulletSystem {
   public bullets: Bullet[] = [];
 
-  constructor(public game: Game) {}
+  constructor(public height: number) {}
 
   update() {
     this.bullets.forEach((a, i) => {
       a.update();
-      if (!a.isVisible(this.game.canvas.height)) {
+      if (!a.isVisible(this.height)) {
         this.bullets.splice(i, 1);
       }
     });
   }
-  draw(ctx: GameContext) {
-    this.bullets.forEach((b) => b.draw(ctx));
-  }
 
-  checkAlienCollision(): number {
+  checkAlienCollision(aliens: Alien[]): number {
     for (const bIndex in this.bullets) {
       const b = this.bullets[bIndex]!;
       if (b.type === BulletType.ALIEN) continue;
-      const index = b.collisionAliens(this.game.aliens.aliens);
+      const index = b.collisionAliens(aliens);
       if (index != -1) {
         this.bullets.splice(+bIndex, 1);
         return index;
@@ -42,11 +37,11 @@ export class BulletSystem {
     return -1;
   }
 
-  checkPlayerCollision(): boolean {
+  checkPlayerCollision(player: Player): boolean {
     for (const bIndex in this.bullets) {
       const b = this.bullets[bIndex]!;
       if (b.type === BulletType.PLAYER) continue;
-      if (b.collisionPlayer(this.game.player)) {
+      if (b.collisionPlayer(player)) {
         this.bullets.splice(+bIndex, 1);
         return true;
       }
@@ -54,13 +49,15 @@ export class BulletSystem {
     return false;
   }
 
-  playerShoot(x: number, y: number) {
-    this.bullets.push(new Bullet(x, y, BulletType.PLAYER));
+  playerShoot(player: Player) {
+    const x = player.x + player.width / 2;
+    const y = player.y;
+    this.bullets.push(new Bullet(x, y, BulletType.PLAYER, 20));
     shootingSound.play();
   }
 
   alienShoot(x: number, y: number, speed: number) {
-    const b = new Bullet(x, y, BulletType.ALIEN);
+    const b = new Bullet(x, y, BulletType.ALIEN, 5);
     b.speed += speed;
     b.width = 7;
     this.bullets.push(b);
@@ -69,10 +66,9 @@ export class BulletSystem {
 
 export class Bullet implements Entity {
   public color: string;
-  public speed: number = 5;
   public width: number = 3;
   public height: number = 20;
-  constructor(public x: number, public y: number, public type: BulletType) {
+  constructor(public x: number, public y: number, public type: BulletType, public speed: number) {
     if (this.type === BulletType.PLAYER) {
       this.color = '#00BCD4';
     } else {
@@ -82,11 +78,6 @@ export class Bullet implements Entity {
 
   update(): void {
     this.y += this.speed * this.type;
-  }
-
-  draw(ctx: CanvasRenderingContext2D): void {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x - this.width / 2, this.y, this.width, this.height);
   }
 
   collisionAliens(aliens: Alien[]): number {

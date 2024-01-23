@@ -2,8 +2,16 @@ import { AlienSystem } from './alien.js';
 import { BulletSystem } from './bullet.js';
 import { InputHandler, Keys } from './input.js';
 import { Player } from './player.js';
+import { SoundEffect, sound } from './sound.js';
 import { GameScreen } from './types.js';
 import { GameUi } from './ui.js';
+
+enum GameState {
+  START,
+  PLAYING,
+  PAUSE,
+  OVER,
+}
 
 export class Game {
   public ctx: CanvasRenderingContext2D;
@@ -13,9 +21,9 @@ export class Game {
   public input: InputHandler = new InputHandler();
   public ui: GameUi;
 
+  public state: GameState = GameState.START;
+
   public score: number = 0;
-  public pause: boolean = false;
-  public isGameOver: boolean = false;
 
   constructor(public canvas: GameScreen) {
     const ctx = canvas.getContext('2d');
@@ -27,65 +35,82 @@ export class Game {
     this.ui.init();
 
     this.ctx = ctx;
-    this.player = new Player(this.canvas.width / 2 - 20, this.canvas.height - this.canvas.height / 6);
-    this.aliens = new AlienSystem(this);
-    this.bullets = new BulletSystem(this);
     document.getElementById('reset')!.style.display = 'none';
   }
 
-  start() {}
+  start() {
+    sound.play(SoundEffect.music);
+    this.state = GameState.PLAYING;
+    this.player = new Player(this.canvas.width, this.canvas.height);
+    this.aliens = new AlienSystem(this.canvas.width, this.canvas.height);
+    this.bullets = new BulletSystem(this.canvas.height);
+    this.score = 0;
+    this.ui = new GameUi(this);
+  }
 
   update(deltaTime: number) {
-    if (this.input.pressed(Keys.ESCAPE) && this.player.alive) {
-      this.pause = !this.pause;
-    }
-    if (this.pause) {
-      return;
-    }
-    if (!this.player.alive) {
-      this.gameOver();
-    }
-    this.player.update(deltaTime, this);
-    this.aliens.update(deltaTime, this);
-    this.bullets.update();
-    const i = this.bullets.checkAlienCollision();
-    if (i !== -1) {
-      this.score += this.aliens.destroy(i);
-    }
-    if (this.bullets.checkPlayerCollision()) {
-      this.player.destroy();
+    switch (this.state) {
+      case GameState.START:
+        break;
+      case GameState.PAUSE:
+        if (this.input.pressed(Keys.ESCAPE)) {
+          this.state = GameState.PLAYING;
+        }
+        break;
+      case GameState.OVER:
+        break;
+      case GameState.PLAYING:
+        this.playing(deltaTime);
+        break;
     }
   }
 
   draw() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ui.background();
-    this.bullets.draw(this.ctx);
-    this.player.draw(this.ctx);
-    this.aliens.draw(this.ctx);
-    this.ui.status();
-    if (this.pause) {
-      if (this.player.alive) {
+    this.ui.clear();
+    switch (this.state) {
+      case GameState.START:
+        this.ui.start();
+        break;
+      case GameState.PLAYING:
+        this.ui.background();
+        this.ui.drawPlayer(this.player);
+        this.ui.drawAliens(this.aliens);
+        this.ui.drawBullets(this.bullets);
+        this.ui.status();
+        break;
+      case GameState.PAUSE:
         this.ui.pause();
-      } else {
+        break;
+      case GameState.OVER:
         this.ui.GameOver();
-      }
     }
   }
+  playing(deltaTime: number) {
+    if (!this.player.alive) {
+      this.state = GameState.OVER;
+    }
+    if (this.input.pressed(Keys.ESCAPE)) {
+      this.state = GameState.PAUSE;
+    }
+    if (this.input.has(Keys.SPACE)) {
+      if (this.player.shoot(deltaTime)) {
+        this.bullets.playerShoot(this.player);
+      }
+    } else {
+      this.player.lastFrameTime = 0;
+    }
+    this.player.update();
+    this.player.checkAliensCollision(this.aliens);
+    this.player.handleInput(this.input);
 
-  gameOver() {
-    this.player.destroy();
-    this.pause = true;
-    this.isGameOver = true;
-  }
-
-  reset() {
-    this.player = new Player(this.canvas.width / 2 - 20, this.canvas.height - this.canvas.height / 6);
-    this.aliens = new AlienSystem(this);
-    this.bullets = new BulletSystem(this);
-    this.score = 0;
-    this.pause = false;
-    this.isGameOver = false;
-    this.ui = new GameUi(this);
+    this.aliens.update(deltaTime, this);
+    this.bullets.update();
+    const i = this.bullets.checkAlienCollision(this.aliens.aliens);
+    if (i !== -1) {
+      this.score += this.aliens.destroy(i);
+    }
+    if (this.bullets.checkPlayerCollision(this.player)) {
+      !this.player.kill();
+    }
   }
 }

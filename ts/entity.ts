@@ -3,5 +3,4 @@ export interface Entity {
   y: number;
   height: number;
   width: number;
-  draw(ctx: CanvasRenderingContext2D): void;
 }

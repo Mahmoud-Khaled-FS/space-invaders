@@ -1,12 +1,14 @@
+import { AlienSystem } from './alien.js';
 import { Entity } from './entity.js';
-import { Game } from './game.js';
-import { Keys } from './input.js';
+import { InputHandler, Keys } from './input.js';
 import { collision } from './utils.js';
 
 const explosionImage = new Image();
 explosionImage.src = '/imgs/explosion2.png';
 
 export class Player implements Entity {
+  public x: number = 0;
+  public y: number = 0;
   public readonly width: number = 70;
   public readonly height: number = 70;
   public vx: number = 0;
@@ -17,74 +19,67 @@ export class Player implements Entity {
 
   public playerBulletTimeDelay = 250;
   public lastFrameTime = 0;
-
   public hearts = 3;
-
   public alive = true;
 
-  constructor(public x: number = 0, public y: number = 0) {
+  constructor(public gameWidth: number, public gameHeight: number) {
+    this.x = gameWidth / 2 - this.width / 2;
+    this.y = gameHeight - gameHeight / 6;
     this.image = new Image();
     this.image.src = '/imgs/ship.png';
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
-    if (!this.alive) {
-      ctx.drawImage(explosionImage, this.x, this.y, this.width, this.height);
-    } else {
-      ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+  update(): void {
+    if (this.x >= this.gameWidth - this.width) {
+      this.x = this.gameWidth - this.width;
     }
-  }
-
-  update(deltaTime: number, game: Game): void {
-    if (this.x >= game.canvas.width - this.width) {
-      this.x = game.canvas.width - this.width;
-    }
-
-    this.handleInput(game);
 
     this.x += this.vx;
     this.y += this.vy;
-    game.aliens.aliens.forEach((a, i) => {
+  }
+
+  shoot(deltaTime: number): boolean {
+    let shooting = false;
+    if (this.lastFrameTime === 0) {
+      shooting = true;
+    }
+    this.lastFrameTime += deltaTime;
+    if (this.lastFrameTime > this.playerBulletTimeDelay) {
+      this.lastFrameTime = 0;
+    }
+    return shooting;
+  }
+
+  checkAliensCollision(aliens: AlienSystem) {
+    aliens.aliens.forEach((a, i) => {
       if (collision(a, this) && !a.destroyed) {
-        this.destroy();
-        game.aliens.destroy(i);
+        this.kill();
+        aliens.destroy(i);
       }
     });
-
-    this.shoot(deltaTime, game);
   }
 
-  shoot(deltaTime: number, game: Game) {
-    if (this.lastFrameTime > this.playerBulletTimeDelay) {
-      if (game.input.has(Keys.SPACE)) {
-        game.bullets.playerShoot(this.x + this.width / 2, this.y);
-        this.lastFrameTime = 0;
-      }
-    } else {
-      this.lastFrameTime += deltaTime;
-    }
-  }
-
-  destroy() {
+  kill(): boolean {
     this.hearts--;
     if (this.hearts === 0) {
       this.alive = false;
     }
+    return this.alive;
   }
 
-  handleInput(game: Game) {
-    if (game.input.has(Keys.LEFT)) {
+  handleInput(input: InputHandler) {
+    if (input.has(Keys.LEFT)) {
       this.moveLeft();
-    } else if (game.input.has(Keys.RIGHT)) {
-      this.moveRight(game.canvas.width);
+    } else if (input.has(Keys.RIGHT)) {
+      this.moveRight(this.gameWidth);
     } else {
       this.vx = 0;
     }
 
-    if (game.input.has(Keys.UP)) {
+    if (input.has(Keys.UP)) {
       this.moveTop();
-    } else if (game.input.has(Keys.DOWN)) {
-      this.moveDown(game.canvas.height);
+    } else if (input.has(Keys.DOWN)) {
+      this.moveDown(this.gameHeight);
     } else {
       this.vy = 0;
     }

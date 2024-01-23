@@ -1,11 +1,8 @@
 import { Entity } from './entity.js';
 import { Game } from './game.js';
-import { newImage, randomNumber, randomWithPercentage } from './utils.js';
-
-const explosionImage = new Image();
-explosionImage.src = '/imgs/explosion1.png';
-
-const explosionSound = new Audio('/sounds/explosion.mp3');
+import { Images } from './images.js';
+import { SoundEffect, sound } from './sound.js';
+import { randomNumber, randomWithPercentage } from './utils.js';
 
 enum AlienType {
   NORMAL = 'normal',
@@ -13,26 +10,19 @@ enum AlienType {
   FAST = 'fast',
 }
 
-// const imagesSrc = ['/imgs/alien2.png', '/imgs/alien3.png', '/imgs/alien4.png'];
-
-const normalImage = newImage('/imgs/alien1.png');
-const angleImage = newImage('/imgs/alien4.png');
-const fastImage = newImage('/imgs/alien2.png');
-
 export class AlienSystem {
   public aliens: Alien[] = [];
   public spawnTimeDelay = 500;
   public lastFrameTime = 0;
-
   public destroyDelay = 1000;
 
-  constructor(public game: Game) {}
+  constructor(public gameWidth: number, public gameHeight: number) {}
 
   spawn() {
     const aliensType: string[] = [AlienType.NORMAL, AlienType.ANGLE, AlienType.FAST];
     const prtAliensType: number[] = [10, 40, 60];
     const alienType: string = aliensType[randomWithPercentage(prtAliensType)]!;
-    const x: number = randomNumber(20, this.game.canvas.width - 70);
+    const x: number = randomNumber(20, this.gameWidth - 70);
     switch (alienType) {
       case AlienType.NORMAL:
         this.aliens.push(new Alien(x));
@@ -46,10 +36,6 @@ export class AlienSystem {
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
-    this.aliens.forEach((a) => a.draw(ctx));
-  }
-
   update(deltaTime: number, game: Game): void {
     if (this.lastFrameTime > this.spawnTimeDelay) {
       this.spawn();
@@ -59,7 +45,7 @@ export class AlienSystem {
     }
     this.aliens.forEach((a, i) => {
       a.update(deltaTime, game);
-      if (!a.isVisible(this.game.canvas.height) || a.destroyTimeLeft > this.destroyDelay) {
+      if (!a.isVisible(this.gameHeight) || a.destroyTimeLeft > this.destroyDelay) {
         this.aliens.splice(i, 1);
       }
     });
@@ -67,7 +53,7 @@ export class AlienSystem {
 
   destroy(index: number): number {
     const a = this.aliens[index]!;
-    explosionSound.play();
+    sound.play(SoundEffect.explosionSound);
     this.aliens[index]!.destroyed = true;
     switch (a.type) {
       case AlienType.NORMAL:
@@ -86,21 +72,15 @@ export class Alien implements Entity {
   public width: number = 50;
   public height: number = 50;
   public type: AlienType = AlienType.NORMAL;
-  public image: CanvasImageSource = normalImage;
-  public playerBulletTimeDelay = randomNumber(500, 2000);
+  public image: CanvasImageSource = Images.alien1;
   public lastFrameTime = 0;
 
+  public alienBulletTimeDelay: number = 0;
   public destroyed: boolean = false;
   public destroyTimeLeft: number = 0;
 
-  constructor(public x: number) {}
-
-  draw(ctx: CanvasRenderingContext2D): void {
-    if (this.destroyed) {
-      ctx.drawImage(explosionImage, this.x, this.y, this.width, this.height);
-    } else {
-      ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-    }
+  constructor(public x: number) {
+    this.resetBulletDelay();
   }
 
   update(deltaTime: number, game: Game): void {
@@ -118,13 +98,16 @@ export class Alien implements Entity {
   }
 
   shoot(deltaTime: number, game: Game) {
-    if (this.lastFrameTime > this.playerBulletTimeDelay) {
+    if (this.lastFrameTime > this.alienBulletTimeDelay) {
       game.bullets.alienShoot(this.x + this.width / 2, this.y + this.height, this.speed);
-      this.playerBulletTimeDelay = randomNumber(400, 1000);
+      this.resetBulletDelay();
       this.lastFrameTime = 0;
     } else {
       this.lastFrameTime += deltaTime;
     }
+  }
+  resetBulletDelay() {
+    this.alienBulletTimeDelay = randomNumber(1000, 2000);
   }
 }
 
@@ -132,7 +115,7 @@ export class AngleAlien extends Alien {
   public angle = 0;
   public va = 0.1;
   public type: AlienType = AlienType.ANGLE;
-  public image: HTMLImageElement = angleImage;
+  public image: HTMLImageElement = Images.alien3;
 
   constructor(x: number) {
     super(x);
@@ -150,7 +133,7 @@ export class AngleAlien extends Alien {
 export class FastAlien extends Alien {
   public type: AlienType = AlienType.FAST;
   public speed: number = 20;
-  public image: HTMLImageElement = fastImage;
+  public image: HTMLImageElement = Images.alien2;
   constructor(x: number) {
     super(x);
   }

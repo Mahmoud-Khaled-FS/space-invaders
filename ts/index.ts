@@ -11,7 +11,6 @@ function main() {
 
   const game = new Game(canvas);
 
-  game.start();
   let lastTimeStamp = 0;
   function renderFrame(timeStamp: number) {
     let deltaTime = timeStamp - lastTimeStamp;
@@ -23,7 +22,7 @@ function main() {
   renderFrame(0);
   const restartButton = document.getElementById('reset')!;
   restartButton?.addEventListener('click', () => {
-    game.reset();
+    game.start();
     restartButton.style.display = 'none';
   });
 }

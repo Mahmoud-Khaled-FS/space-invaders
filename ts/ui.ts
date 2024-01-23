@@ -1,4 +1,9 @@
-import { Game } from './game';
+import { AlienSystem } from './alien.js';
+import { BulletSystem } from './bullet.js';
+import { Game } from './game.js';
+import { Images } from './images.js';
+import { Player } from './player.js';
+import { GameContext } from './types.js';
 
 const heartImage = new Image();
 heartImage.src = '/imgs/heart.png';
@@ -7,7 +12,10 @@ export class GameUi {
   public gameTime: number = new Date().getTime();
   public seconds: number = 0;
   public minutes: number = 0;
-  constructor(public game: Game) {}
+  public ctx: GameContext;
+  constructor(public game: Game) {
+    this.ctx = game.ctx;
+  }
 
   init() {
     this.game.canvas.width = 1100;
@@ -59,5 +67,44 @@ export class GameUi {
     ctx.font = '40px';
     ctx.fillText(`SCORE: ${this.game.score}`, this.game.canvas.width / 2, this.game.canvas.height / 2);
     document.getElementById('reset')!.style.display = 'block';
+  }
+
+  clear() {
+    this.game.ctx.clearRect(0, 0, this.game.canvas.width, this.game.canvas.height);
+  }
+
+  start() {
+    const ctx = this.game.ctx;
+    ctx.drawImage(Images.background, 0, 0, this.game.canvas.width, this.game.canvas.height);
+    ctx.font = '100px Nabla';
+    ctx.fillStyle = '#FFE84A';
+    ctx.textAlign = 'center';
+    ctx.fillText('SPACE INVADER', this.game.canvas.width / 2, this.game.canvas.height / 2 - 100);
+    document.getElementById('reset')!.style.display = 'block';
+  }
+
+  drawPlayer(player: Player) {
+    if (!player.alive) {
+      this.ctx.drawImage(Images.explosion2, player.x, player.y, player.width, player.height);
+    } else {
+      this.ctx.drawImage(Images.player, player.x, player.y, player.width, player.height);
+    }
+  }
+
+  drawAliens(aliens: AlienSystem) {
+    aliens.aliens.forEach((a) => {
+      if (a.destroyed) {
+        this.ctx.drawImage(Images.explosion1, a.x, a.y, a.width, a.height);
+      } else {
+        this.ctx.drawImage(a.image, a.x, a.y, a.width, a.height);
+      }
+    });
+  }
+
+  drawBullets(bullets: BulletSystem) {
+    bullets.bullets.forEach((b) => {
+      this.ctx.fillStyle = b.color;
+      this.ctx.fillRect(b.x - b.width / 2, b.y, b.width, b.height);
+    });
   }
 }
