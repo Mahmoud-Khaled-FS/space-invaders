@@ -1,8 +1,5 @@
 import { Game } from './game.js';
 
-const explosionImage = new Image();
-explosionImage.src = '/imgs/explosion.png';
-
 function main() {
   const canvas = document.getElementById('game') as HTMLCanvasElement;
   if (!canvas) {

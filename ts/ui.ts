@@ -5,9 +5,6 @@ import { Images } from './images.js';
 import { Player, PlayerStatus } from './player.js';
 import { GameContext } from './types.js';
 
-const heartImage = new Image();
-heartImage.src = '/imgs/heart.png';
-
 export class GameUi {
   public gameTime: number = new Date().getTime();
   public seconds: number = 0;
@@ -44,7 +41,7 @@ export class GameUi {
     ctx.fillText(`${this.minutes.toString().padStart(2, '0')}:${this.seconds.toString().padStart(2, '0')}`, 20, 60);
 
     for (let i = 0; i < this.game.player.hearts; i++) {
-      ctx.drawImage(heartImage, 20 + i * 40, 80, 30, 30);
+      ctx.drawImage(Images.heart, 20 + i * 40, 80, 30, 30);
     }
   }
   pause() {

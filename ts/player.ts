@@ -4,9 +4,6 @@ import { InputHandler, Keys } from './input.js';
 import { soundEffect, sounds } from './sound.js';
 import { collision } from './utils.js';
 
-const explosionImage = new Image();
-explosionImage.src = '/imgs/explosion2.png';
-
 export enum PlayerStatus {
   ALIVE,
   DEAD,
@@ -33,8 +30,6 @@ export class Player implements Entity {
   constructor(public gameWidth: number, public gameHeight: number) {
     this.x = gameWidth / 2 - this.width / 2;
     this.y = gameHeight - gameHeight / 6;
-    this.image = new Image();
-    this.image.src = '/imgs/ship.png';
   }
 
   update(): void {
