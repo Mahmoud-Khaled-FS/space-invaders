@@ -24,12 +24,6 @@ export class GameUi {
     this.game.canvas.height = 800;
   }
 
-  background() {
-    // this.game.ctx.fillStyle = '#00082C';
-    this.game.ctx.drawImage(Images.gameBackground, 0, 0);
-    // this.game.ctx.fillRect(0, 0, this.game.canvas.width, this.game.canvas.height);
-  }
-
   status() {
     const ctx = this.game.ctx;
     ctx.fillStyle = '#ffffff';

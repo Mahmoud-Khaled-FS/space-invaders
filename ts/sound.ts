@@ -44,8 +44,11 @@ class SoundEffect {
     sound.source.onended = () => (sound.isPlaying = false);
   }
   stop(sound: Sound) {
-    sound.isPlaying = false;
+    this.pause(sound);
     sound.source.currentTime = 0;
+  }
+  pause(sound: Sound) {
+    sound.isPlaying = false;
     sound.source.pause();
   }
 }

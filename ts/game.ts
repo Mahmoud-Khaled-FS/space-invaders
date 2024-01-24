@@ -56,8 +56,9 @@ export class Game {
       case GameState.START:
         break;
       case GameState.PAUSE:
-        soundEffect.stop(sounds.music);
+        soundEffect.pause(sounds.music);
         if (this.input.pressed(Keys.ESCAPE)) {
+          soundEffect.play(sounds.music);
           this.state = GameState.PLAYING;
         }
         break;
@@ -92,6 +93,9 @@ export class Game {
         this.ui.pause();
         break;
       case GameState.OVER:
+        this.background.draw(this.ctx);
+        this.ui.drawPlayer(this.player);
+        this.ui.drawAliens(this.aliens);
         this.ui.GameOver();
     }
   }

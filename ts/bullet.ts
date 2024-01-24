@@ -56,7 +56,7 @@ export class BulletSystem {
   }
 
   alienShoot(x: number, y: number, speed: number) {
-    const b = new Bullet(x, y, BulletType.ALIEN, 5);
+    const b = new Bullet(x, y, BulletType.ALIEN, 2);
     b.speed += speed;
     b.width = 7;
     this.bullets.push(b);

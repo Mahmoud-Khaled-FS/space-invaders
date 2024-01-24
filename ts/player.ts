@@ -79,7 +79,7 @@ export class Player implements Entity {
       this.status = PlayerStatus.DEAD;
     } else {
       this.status = PlayerStatus.REVIVED;
-      setTimeout(() => (this.status = PlayerStatus.ALIVE), 1000);
+      setTimeout(() => (this.status = PlayerStatus.ALIVE), 2000);
     }
   }
 

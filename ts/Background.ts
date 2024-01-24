@@ -31,19 +31,15 @@ class Layer {
 }
 
 export class Background {
-  public background = Images.gameBackground;
-  public x = 0;
-  public y = 0;
-  public speed = 1;
   public layers: Layer[] = [];
   constructor(public width: number, public height: number) {
-    this.layers.push(new Layer(Images.gameBackground, 10));
-    this.layers.push(new Layer(Images.layer1, 10).setX(500));
-    this.layers.push(new Layer(Images.layer2, 10).setX(-30));
-    this.layers.push(new Layer(Images.layer3, 20).setX(1000));
-    this.layers.push(new Layer(Images.layer5, randomNumber(5, 10)).setX(randomNumber(0, 1000)));
-    this.layers.push(new Layer(Images.layer6, randomNumber(5, 10)).setX(randomNumber(0, 1000)));
-    this.layers.push(new Layer(Images.layer7, randomNumber(5, 10)).setX(randomNumber(0, 1000)));
+    this.layers.push(new Layer(Images.gameBackground, 1));
+    this.layers.push(new Layer(Images.layer1, 2).setX(500));
+    this.layers.push(new Layer(Images.layer2, 3).setX(-30));
+    this.layers.push(new Layer(Images.layer3, 4).setX(1000));
+    this.layers.push(new Layer(Images.layer5, randomNumber(1, 5)).setX(randomNumber(0, 1000)));
+    this.layers.push(new Layer(Images.layer6, randomNumber(1, 5)).setX(randomNumber(0, 1000)));
+    this.layers.push(new Layer(Images.layer7, randomNumber(1, 5)).setX(randomNumber(0, 1000)));
   }
   update() {
     this.layers.forEach((l) => l.update());

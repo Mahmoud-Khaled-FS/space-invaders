@@ -12,7 +12,7 @@ enum AlienType {
 
 export class AlienSystem {
   public aliens: Alien[] = [];
-  public spawnTimeDelay = 500;
+  public spawnTimeDelay = 650;
   public lastFrameTime = 0;
   public destroyDelay = 1000;
 
