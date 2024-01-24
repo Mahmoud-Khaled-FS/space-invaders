@@ -2,7 +2,7 @@ import { AlienSystem } from './alien.js';
 import { BulletSystem } from './bullet.js';
 import { Game } from './game.js';
 import { Images } from './images.js';
-import { Player } from './player.js';
+import { Player, PlayerStatus } from './player.js';
 import { GameContext } from './types.js';
 
 const heartImage = new Image();
@@ -12,6 +12,8 @@ export class GameUi {
   public gameTime: number = new Date().getTime();
   public seconds: number = 0;
   public minutes: number = 0;
+  public playerDrawDelay: number = 0;
+  public reviveDraw: boolean = false;
   public ctx: GameContext;
   constructor(public game: Game) {
     this.ctx = game.ctx;
@@ -23,8 +25,9 @@ export class GameUi {
   }
 
   background() {
-    this.game.ctx.fillStyle = '#000000';
-    this.game.ctx.fillRect(0, 0, this.game.canvas.width, this.game.canvas.height);
+    // this.game.ctx.fillStyle = '#00082C';
+    this.game.ctx.drawImage(Images.gameBackground, 0, 0);
+    // this.game.ctx.fillRect(0, 0, this.game.canvas.width, this.game.canvas.height);
   }
 
   status() {
@@ -84,10 +87,19 @@ export class GameUi {
   }
 
   drawPlayer(player: Player) {
-    if (!player.alive) {
-      this.ctx.drawImage(Images.explosion2, player.x, player.y, player.width, player.height);
-    } else {
-      this.ctx.drawImage(Images.player, player.x, player.y, player.width, player.height);
+    switch (player.status) {
+      case PlayerStatus.REVIVED:
+        if (this.reviveDraw) {
+          this.ctx.drawImage(Images.player, player.x, player.y, player.width, player.height);
+        }
+        this.reviveDraw = !this.reviveDraw;
+        break;
+      case PlayerStatus.ALIVE:
+        this.ctx.drawImage(Images.player, player.x, player.y, player.width, player.height);
+        break;
+      case PlayerStatus.DEAD:
+        this.ctx.drawImage(Images.explosion2, player.x, player.y, player.width, player.height);
+        break;
     }
   }
 

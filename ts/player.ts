@@ -7,6 +7,12 @@ import { collision } from './utils.js';
 const explosionImage = new Image();
 explosionImage.src = '/imgs/explosion2.png';
 
+export enum PlayerStatus {
+  ALIVE,
+  DEAD,
+  REVIVED,
+}
+
 export class Player implements Entity {
   public x: number = 0;
   public y: number = 0;
@@ -21,7 +27,8 @@ export class Player implements Entity {
   public playerBulletTimeDelay = 250;
   public lastFrameTime = 0;
   public hearts = 3;
-  public alive = true;
+
+  public status: PlayerStatus = PlayerStatus.ALIVE;
 
   constructor(public gameWidth: number, public gameHeight: number) {
     this.x = gameWidth / 2 - this.width / 2;
@@ -60,13 +67,20 @@ export class Player implements Entity {
     });
   }
 
-  kill(): boolean {
+  kill() {
+    if (this.status === PlayerStatus.REVIVED) {
+      return;
+    }
+
     soundEffect.play(sounds.explosion);
     this.hearts--;
+
     if (this.hearts === 0) {
-      this.alive = false;
+      this.status = PlayerStatus.DEAD;
+    } else {
+      this.status = PlayerStatus.REVIVED;
+      setTimeout(() => (this.status = PlayerStatus.ALIVE), 1000);
     }
-    return this.alive;
   }
 
   handleInput(input: InputHandler) {
@@ -117,5 +131,9 @@ export class Player implements Entity {
       return;
     }
     this.vy = 0;
+  }
+
+  isDead(): boolean {
+    return this.status === PlayerStatus.DEAD;
   }
 }

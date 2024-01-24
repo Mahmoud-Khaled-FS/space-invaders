@@ -1,3 +1,4 @@
+import { Background } from './Background.js';
 import { AlienSystem } from './alien.js';
 import { BulletSystem } from './bullet.js';
 import { InputHandler, Keys } from './input.js';
@@ -20,6 +21,7 @@ export class Game {
   public bullets: BulletSystem;
   public input: InputHandler = new InputHandler();
   public ui: GameUi;
+  public background: Background;
 
   public state: GameState = GameState.START;
 
@@ -46,6 +48,7 @@ export class Game {
     this.bullets = new BulletSystem(this.canvas.height);
     this.score = 0;
     this.ui = new GameUi(this);
+    this.background = new Background(this.canvas.width, this.canvas.height);
   }
 
   update(deltaTime: number) {
@@ -53,6 +56,7 @@ export class Game {
       case GameState.START:
         break;
       case GameState.PAUSE:
+        soundEffect.stop(sounds.music);
         if (this.input.pressed(Keys.ESCAPE)) {
           this.state = GameState.PLAYING;
         }
@@ -73,13 +77,18 @@ export class Game {
         this.ui.start();
         break;
       case GameState.PLAYING:
-        this.ui.background();
+        // this.ui.background();
+        this.background.draw(this.ctx);
         this.ui.drawPlayer(this.player);
         this.ui.drawAliens(this.aliens);
         this.ui.drawBullets(this.bullets);
         this.ui.status();
         break;
       case GameState.PAUSE:
+        this.background.draw(this.ctx);
+        this.ui.drawPlayer(this.player);
+        this.ui.drawAliens(this.aliens);
+        this.ui.drawBullets(this.bullets);
         this.ui.pause();
         break;
       case GameState.OVER:
@@ -87,7 +96,8 @@ export class Game {
     }
   }
   playing(deltaTime: number) {
-    if (!this.player.alive) {
+    this.background.update();
+    if (this.player.isDead()) {
       this.state = GameState.OVER;
     }
     if (this.input.pressed(Keys.ESCAPE)) {
@@ -111,7 +121,7 @@ export class Game {
       this.score += this.aliens.destroy(i);
     }
     if (this.bullets.checkPlayerCollision(this.player)) {
-      !this.player.kill();
+      this.player.kill();
     }
   }
 }
