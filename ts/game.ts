@@ -2,7 +2,7 @@ import { AlienSystem } from './alien.js';
 import { BulletSystem } from './bullet.js';
 import { InputHandler, Keys } from './input.js';
 import { Player } from './player.js';
-import { SoundEffect, sound } from './sound.js';
+import { soundEffect, sounds } from './sound.js';
 import { GameScreen } from './types.js';
 import { GameUi } from './ui.js';
 
@@ -39,7 +39,7 @@ export class Game {
   }
 
   start() {
-    sound.play(SoundEffect.music);
+    soundEffect.play(sounds.music, { repeat: true });
     this.state = GameState.PLAYING;
     this.player = new Player(this.canvas.width, this.canvas.height);
     this.aliens = new AlienSystem(this.canvas.width, this.canvas.height);
@@ -58,6 +58,7 @@ export class Game {
         }
         break;
       case GameState.OVER:
+        soundEffect.stop(sounds.music);
         break;
       case GameState.PLAYING:
         this.playing(deltaTime);

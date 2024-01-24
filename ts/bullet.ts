@@ -1,14 +1,13 @@
 import { Alien } from './alien.js';
 import { Entity } from './entity.js';
 import { Player } from './player.js';
+import { soundEffect, sounds } from './sound.js';
 import { collision } from './utils.js';
 
 export enum BulletType {
   PLAYER = -1,
   ALIEN = 1,
 }
-
-const shootingSound = new Audio('/sounds/shooting.mp3');
 
 export class BulletSystem {
   public bullets: Bullet[] = [];
@@ -53,7 +52,7 @@ export class BulletSystem {
     const x = player.x + player.width / 2;
     const y = player.y;
     this.bullets.push(new Bullet(x, y, BulletType.PLAYER, 20));
-    shootingSound.play();
+    soundEffect.play(sounds.bullet);
   }
 
   alienShoot(x: number, y: number, speed: number) {

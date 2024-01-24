@@ -1,7 +1,7 @@
 import { Entity } from './entity.js';
 import { Game } from './game.js';
 import { Images } from './images.js';
-import { SoundEffect, sound } from './sound.js';
+import { soundEffect, sounds } from './sound.js';
 import { randomNumber, randomWithPercentage } from './utils.js';
 
 enum AlienType {
@@ -53,7 +53,7 @@ export class AlienSystem {
 
   destroy(index: number): number {
     const a = this.aliens[index]!;
-    sound.play(SoundEffect.explosionSound);
+    soundEffect.play(sounds.explosion);
     this.aliens[index]!.destroyed = true;
     switch (a.type) {
       case AlienType.NORMAL:

@@ -1,6 +1,7 @@
 import { AlienSystem } from './alien.js';
 import { Entity } from './entity.js';
 import { InputHandler, Keys } from './input.js';
+import { soundEffect, sounds } from './sound.js';
 import { collision } from './utils.js';
 
 const explosionImage = new Image();
@@ -60,6 +61,7 @@ export class Player implements Entity {
   }
 
   kill(): boolean {
+    soundEffect.play(sounds.explosion);
     this.hearts--;
     if (this.hearts === 0) {
       this.alive = false;

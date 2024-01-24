@@ -1,16 +1,53 @@
 type SoundOptions = {
   volume: number;
+  repeat: boolean;
 };
 
-export class SoundEffect {
-  static explosionSound: HTMLAudioElement = new Audio('/sounds/explosion.mp3');
-  static music: HTMLAudioElement = new Audio('/sounds/music.mp3');
-  play(sound: HTMLAudioElement, options?: Partial<SoundOptions>) {
-    if (options?.volume) {
-      sound.volume = options.volume / 100;
+type Sound = {
+  id: number;
+  source: HTMLAudioElement;
+  isPlaying: boolean;
+};
+
+let lastId = 0;
+
+function newSound(path: string): Sound {
+  lastId++;
+  return {
+    source: new Audio(path),
+    id: lastId,
+    isPlaying: false,
+  };
+}
+
+export const sounds = {
+  explosion: newSound('/sounds/explosion.mp3'),
+  bullet: newSound('/sounds/shooting.mp3'),
+  music: newSound('/sounds/music.mp3'),
+} as const;
+
+class SoundEffect {
+  play(sound: Sound, options?: Partial<SoundOptions>) {
+    if (sound.isPlaying) {
+      return;
     }
-    sound.play();
+
+    if (options?.volume) {
+      sound.source.volume = options.volume / 100;
+    }
+    if (options?.repeat) {
+      sound.source.loop = true;
+    }
+
+    sound.isPlaying = true;
+    sound.source.play();
+    sound.source.onended = () => (sound.isPlaying = false);
+  }
+  stop(sound: Sound) {
+    sound.isPlaying = false;
+    sound.source.currentTime = 0;
+    sound.source.pause();
   }
 }
 
-export const sound = new SoundEffect();
+export const soundEffect = new SoundEffect();
