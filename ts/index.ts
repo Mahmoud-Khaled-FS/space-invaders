@@ -22,6 +22,11 @@ function main() {
     game.start();
     restartButton.style.display = 'none';
   });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      game.pause();
+    }
+  });
 }
 
 window.onload = main;

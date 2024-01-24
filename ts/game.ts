@@ -56,7 +56,6 @@ export class Game {
       case GameState.START:
         break;
       case GameState.PAUSE:
-        soundEffect.pause(sounds.music);
         if (this.input.pressed(Keys.ESCAPE)) {
           soundEffect.play(sounds.music);
           this.state = GameState.PLAYING;
@@ -105,7 +104,7 @@ export class Game {
       this.state = GameState.OVER;
     }
     if (this.input.pressed(Keys.ESCAPE)) {
-      this.state = GameState.PAUSE;
+      this.pause();
     }
     if (this.input.has(Keys.SPACE)) {
       if (this.player.shoot(deltaTime)) {
@@ -127,5 +126,10 @@ export class Game {
     if (this.bullets.checkPlayerCollision(this.player)) {
       this.player.kill();
     }
+  }
+
+  pause() {
+    soundEffect.pause(sounds.music);
+    this.state = GameState.PAUSE;
   }
 }
